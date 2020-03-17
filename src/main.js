@@ -4,9 +4,13 @@ import router from "./router";
 import store from "./store";
 
 // element-ui
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI);
+import "./plugins/element-ui.js";
+
+// icon-font
+import "./assets/fonts/iconfont.css";
+
+// 全局样式
+import "./assets/css/global.css";
 
 // 消息提示的环境配置，设置为开发环境或者生产环境
 Vue.config.productionTip = false;
