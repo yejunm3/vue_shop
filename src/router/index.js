@@ -1,18 +1,37 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import login from "../components/Login.vue";
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import login from '../components/Login.vue'
+import home from '../components/Home.vue'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const routes = [
-  { path: "/", redirect: "/login" },
-  { path: "/login", component: login }
-];
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: login, name: 'login' },
+  { path: '/home', component: home, name: 'home' }
+]
 
 const router = new VueRouter({
-  mode: "hash",
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
-});
+})
 
-export default router;
+/**
+ * 路由导航守卫
+ * 1、判断要前往的路径是否为'/login'，是，则放行
+ * 2、获取token，如果有的话就放行，否则强制定向到'/login'
+ *
+ * 参数：
+ * to：表示将要前往的路由
+ * from：表示路由来源
+ * next：是一个函数，表示放行
+ */
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') return next()
+  const token = window.sessionStorage.getItem('token')
+  if (!token) return next('./login')
+  next()
+})
+
+export default router
