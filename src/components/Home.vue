@@ -1,11 +1,12 @@
 <template>
   <el-container class="main">
-    <!-- 侧边栏 Start -->
+    <!-- 侧边栏 -->
     <el-aside width="auto">
       <el-menu
-        default-active="1-1"
-        class="el-menu-vertical-demo"
+        :default-active="this.defaultIndex + ''"
         :collapse="isCollapse"
+        :unique-opened="false"
+        class="el-menu-vertical-demo"
         background-color="#35495e"
         text-color="#fff"
       >
@@ -13,34 +14,20 @@
           <img src="../assets/logo.png" />
           <h3 v-show="!isCollapse">后台管理系统</h3>
         </div>
-        <el-submenu index="1">
+        <!-- 侧边栏渲染：这里绑定的index必须是唯一的字符串，item.id直接加上一个空字符串即可 -->
+        <el-submenu v-for="subList in menuList" :key="subList.id" :index="subList.id + ''">
           <template slot="title">
-            <i class="el-icon-location"></i>
-            <span slot="title">导航一</span>
+            <i :class="iconList[subList.id]"></i>
+            <span slot="title">{{subList.authName}}</span>
           </template>
-          <el-menu-item-group>
-            <span slot="title">分组一</span>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-          </el-menu-item-group>
+          <!-- 子侧边栏渲染 -->
+          <el-menu-item v-for="item in subList.children" :key="item.id" :index="item.id + ''">{{item.authName}}</el-menu-item>
         </el-submenu>
-        <el-menu-item index="2">
-          <i class="el-icon-menu"></i>
-          <span slot="title">导航二</span>
-        </el-menu-item>
-        <el-menu-item index="3">
-          <i class="el-icon-document"></i>
-          <span slot="title">导航三</span>
-        </el-menu-item>
-        <el-menu-item index="4">
-          <i class="el-icon-setting"></i>
-          <span slot="title">导航四</span>
-        </el-menu-item>
       </el-menu>
     </el-aside>
-    <!-- 侧边栏 End -->
+
     <el-container>
-      <!-- 页头 Start -->
+      <!-- 页头 -->
       <el-header>
         <div class="handle-span">
           <span
@@ -58,12 +45,10 @@
           </el-dropdown-menu>
         </el-dropdown>
       </el-header>
-      <!-- 页头 End -->
-      <!-- 主体 Start -->
+      <!-- 主体 -->
       <el-main>
         主体
       </el-main>
-      <!-- 主体 End -->
     </el-container>
   </el-container>
 </template>
@@ -72,7 +57,9 @@
 export default {
   data() {
     return {
-      isCollapse: false
+      isCollapse: false,
+      menuList: [],
+      defaultIndex: ''
     }
   },
   methods: {
@@ -83,24 +70,53 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-      .then(() => {
-        this.$message({
-          type: 'success',
-          message: '退出登录成功!'
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '退出登录成功!'
+          })
+          window.sessionStorage.clear()
+          this.$router.push({ name: 'login' })
         })
-        window.sessionStorage.clear()
-        this.$router.push({ name: 'login' })
-      })
-      .catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消操作'
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          })
         })
-      })
     },
+    // 侧边栏切换
     handleSpan() {
       this.isCollapse = !this.isCollapse
+    },
+    // 侧边栏参数
+    async getMenuList() {
+      const { data: res } = await this.$axios.get('menus')
+      this.menuList = res.data
+      this.defaultIndex = res.data[0].children[0].id
+      console.log(this.menuList)
     }
+  },
+  // 重构图标 返回`[列表id]: class名`这样形式的数组
+  computed: {
+    iconList: function() {
+      let iconArr = [
+        'el-icon-user-solid',
+        'el-icon-s-cooperation',
+        'el-icon-s-goods',
+        'el-icon-s-shop',
+        'el-icon-s-data'
+      ]
+      let iconListArr = []
+      this.menuList.forEach((item, i) => {
+        iconListArr[item.id] = iconArr[i]
+      })
+      console.log(iconListArr)
+      return iconListArr
+    }
+  },
+  created() {
+    this.getMenuList()
   }
 }
 </script>

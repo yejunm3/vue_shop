@@ -54,31 +54,43 @@ export default {
     }
   },
   methods: {
+    // 表单提交预验证
     onSubmit() {
       this.$refs.form.validate(async checkVal => {
         if (!checkVal) return
-        const { data: res } = await this.$axios.post('login', this.form) // await 直接返回promise中的内容
-        if (res.meta.status === 200) {
-          console.log(res)
-          // 1、提示
+        try {
+          /**
+           * 提示
+           * 存储于 Session Storage
+           * 编程式导航
+           */
+          const { data: res } = await this.$axios.post('login', this.form) // 解构赋值
+          if (res.meta.status === 200) {
+            console.log(res)
+            this.$message({
+              showClose: true,
+              message: '登录成功！',
+              type: 'success'
+            })
+            window.sessionStorage.setItem('token', res.data.token)
+            this.$router.push({ name: 'home' })
+          } else {
+            this.$message({
+              showClose: true,
+              message: '登录失败，请稍后重试！',
+              type: 'error'
+            })
+          }
+        } catch (err) {
           this.$message({
             showClose: true,
-            message: '登录成功！',
-            type: 'success'
-          })
-          // 2、存储于 Session Storage
-          window.sessionStorage.setItem('token', res.data.token)
-          // 3、编程式导航
-          this.$router.push({ name: 'home' })
-        } else {
-          this.$message({
-            showClose: true,
-            message: '登录失败，请稍后重试！',
+            message: err,
             type: 'error'
           })
         }
       })
     },
+    // 表单重置
     onReset() {
       this.$refs.form.resetFields()
     }
