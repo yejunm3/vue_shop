@@ -3,12 +3,13 @@
     <!-- 侧边栏 -->
     <el-aside width="auto">
       <el-menu
-        :default-active="this.defaultIndex + ''"
+        :default-active="defaultIndex + ''"
         :collapse="isCollapse"
-        :unique-opened="false"
+        :unique-opened="true"
         class="el-menu-vertical-demo"
         background-color="#35495e"
         text-color="#fff"
+        router
       >
         <div class="main-title">
           <img src="../assets/logo.png" />
@@ -18,10 +19,15 @@
         <el-submenu v-for="subList in menuList" :key="subList.id" :index="subList.id + ''">
           <template slot="title">
             <i :class="iconList[subList.id]"></i>
-            <span slot="title">{{subList.authName}}</span>
+            <span slot="title">{{ subList.authName }}</span>
           </template>
           <!-- 子侧边栏渲染 -->
-          <el-menu-item v-for="item in subList.children" :key="item.id" :index="item.id + ''">{{item.authName}}</el-menu-item>
+          <el-menu-item
+            v-for="item in subList.children"
+            :key="item.id"
+            :index="item.path + ''"
+            @click="changeDefaultIndex(item.path)"
+          >{{ item.authName }}</el-menu-item>
         </el-submenu>
       </el-menu>
     </el-aside>
@@ -30,10 +36,7 @@
       <!-- 页头 -->
       <el-header>
         <div class="handle-span">
-          <span
-            :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
-            @click="handleSpan"
-          ></span>
+          <span :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'" @click="handleSpan"></span>
         </div>
         <el-dropdown>
           <span class="el-dropdown-link">
@@ -47,9 +50,10 @@
       </el-header>
       <!-- 主体 -->
       <el-main>
-        主体
+        <router-view></router-view>
       </el-main>
     </el-container>
+
   </el-container>
 </template>
 
@@ -59,7 +63,7 @@ export default {
     return {
       isCollapse: false,
       menuList: [],
-      defaultIndex: ''
+      defaultIndex: 'users'
     }
   },
   methods: {
@@ -70,20 +74,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '退出登录成功!'
-          })
-          window.sessionStorage.clear()
-          this.$router.push({ name: 'login' })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消操作'
-          })
-        })
+      .then(() => {
+        this.$message.success('退出登录成功!')
+        window.sessionStorage.clear()
+        this.$router.push({ name: 'login' })
+      })
+      .catch(() => {
+        this.$message.info('已取消操作')
+      })
     },
     // 侧边栏切换
     handleSpan() {
@@ -93,8 +91,17 @@ export default {
     async getMenuList() {
       const { data: res } = await this.$axios.get('menus')
       this.menuList = res.data
-      this.defaultIndex = res.data[0].children[0].id
       console.log(this.menuList)
+    },
+    // 更改默认值
+    changeDefaultIndex(path) {
+      window.sessionStorage.setItem('defaultIndex', path)
+      this.defaultIndex = path
+    },
+    // 获取默认值
+    getDefaultIndex() {
+      this.defaultIndex = window.sessionStorage.getItem('defaultIndex') || this.defaultIndex
+      console.log(this.defaultIndex)
     }
   },
   // 重构图标 返回`[列表id]: class名`这样形式的数组
@@ -117,6 +124,7 @@ export default {
   },
   created() {
     this.getMenuList()
+    this.getDefaultIndex()
   }
 }
 </script>

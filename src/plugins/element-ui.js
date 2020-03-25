@@ -26,7 +26,13 @@ import {
   RadioGroup,
   RadioButton,
   Icon,
-  Avatar
+  Avatar,
+  Breadcrumb,
+  BreadcrumbItem,
+  Card,
+  Table,
+  TableColumn,
+  Switch
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -51,6 +57,12 @@ Vue.use(RadioGroup)
 Vue.use(RadioButton)
 Vue.use(Icon)
 Vue.use(Avatar)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
