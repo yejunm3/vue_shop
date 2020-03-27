@@ -32,7 +32,9 @@ import {
   Card,
   Table,
   TableColumn,
-  Switch
+  Switch,
+  Pagination,
+  Tooltip
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -63,6 +65,8 @@ Vue.use(Card)
 Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Switch)
+Vue.use(Pagination)
+Vue.use(Tooltip)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox

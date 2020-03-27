@@ -101,7 +101,7 @@ export default {
     // 获取默认值
     getDefaultIndex() {
       this.defaultIndex = window.sessionStorage.getItem('defaultIndex') || this.defaultIndex
-      console.log(this.defaultIndex)
+      // console.log(this.defaultIndex)
     }
   },
   // 重构图标 返回`[列表id]: class名`这样形式的数组
@@ -118,7 +118,7 @@ export default {
       this.menuList.forEach((item, i) => {
         iconListArr[item.id] = iconArr[i]
       })
-      console.log(iconListArr)
+      // console.log(iconListArr)
       return iconListArr
     }
   },

@@ -9,15 +9,21 @@
     <el-card class="box-card">
       <!-- 头部 -->
       <div slot="header" class="box-card-header">
-        <el-input v-model="addValue" placeholder="请输入内容"></el-input>
-        <el-button icon="el-icon-search" circle></el-button>
+        <el-input 
+          v-model="queryInfo.query"
+          placeholder="请输入内容"
+          @keyup.native.enter="seachUsers" 
+          @clear="getUsersList"
+          clearable 
+        ></el-input>
+        <el-button icon="el-icon-search" circle @click="seachUsers"></el-button>
         <el-button round>添加用户</el-button>
       </div>
       <!-- 主体 -->
       <el-table
-        :data="usersList"
         style="width: 100%"
-        :default-sort = "{prop: 'id', order: 'ascending'}"
+        :data="usersList"
+        :default-sort="{ prop: 'id', order: 'ascending' }"
       >
         <el-table-column type="index" label="#"></el-table-column>
         <el-table-column prop="id" label="ID"></el-table-column>
@@ -25,17 +31,37 @@
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
         <el-table-column prop="mobile" label="电话"></el-table-column>
+        <!-- 状态渲染 -->
         <el-table-column prop="mg_state" label="状态">
-          <template slot-scope='scope'>
-              <el-switch v-model="scope.row.mg_state"></el-switch>
+          <template slot-scope="scope">
+            <el-switch v-model="scope.row.mg_state" @change="changeState(scope.row)"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
-          <el-button type="primary" icon="el-icon-edit" circle></el-button>
-          <el-button type="success" icon="el-icon-check" circle></el-button>
-          <!-- <el-button type="danger" icon="el-icon-delete" circle></el-button> -->
+        <!-- 操作选项 -->
+        <el-table-column label="操作" width="200">
+          <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
+            <el-button type="primary" size="mini" icon="el-icon-edit"></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
+            <el-button type="success" size="mini" icon="el-icon-check"></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="删除" placement="top-start" :enterable="false">
+            <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
+          </el-tooltip>
         </el-table-column>
+        <!--  -->
       </el-table>
+      <!-- 分页 -->
+      <el-pagination
+        layout="total, sizes, prev, pager, next, jumper"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+        :current-page="queryInfo.pagenum"
+        :page-size="queryInfo.pagesize"
+        :page-sizes="[1, 2, 3, 4]"
+        :total="total"
+      >
+      </el-pagination>
     </el-card>
   </div>
 </template>
@@ -52,14 +78,14 @@ export default {
       queryInfo: {
         query: '',
         pagenum: 1,
-        pagesize: 10
+        pagesize: 2
       },
       usersList: [],
-      total: '',
-      addValue: ''
+      total: null
     }
   },
   methods: {
+    // 获取用户列表
     async getUsersList() {
       const { data: res } = await this.$axios.get('users', {
         params: this.queryInfo
@@ -67,7 +93,32 @@ export default {
       if (res.meta.status !== 200) return this.$message.error('获取列表失败')
       this.usersList = res.data.users
       this.total = res.data.total
-      console.log(this.usersList)
+      console.log(res.data)
+    },
+    // 监听分页 页码值变化
+    handleCurrentChange(newNum) {
+      this.queryInfo.pagenum = newNum
+      this.getUsersList()
+    },
+    // 监听分页 下拉变化
+    handleSizeChange(newSize) {
+      this.queryInfo.pagesize = newSize
+      this.getUsersList()
+    },
+    // 修改用户状态 失败时值取反
+    async changeState(stateMsg) {
+      const { data: res } = await this.$axios.put(`users/${stateMsg.id}/state/${stateMsg.mg_state}`)
+      if (res.meta.status !== 200) {
+        stateMsg.mg_state = !stateMsg.mg_state
+        return this.$message.error('更新状态失败')
+      } else {
+        this.$message.success('更新状态成功')
+      }
+      console.log(res)
+    },
+    // 搜索功能
+    seachUsers() {
+      this.getUsersList()
     }
   },
   created() {
@@ -90,6 +141,9 @@ export default {
         margin-right: 10px;
       }
     }
+  }
+  .el-table {
+    margin-bottom: 20px;
   }
 }
 </style>
