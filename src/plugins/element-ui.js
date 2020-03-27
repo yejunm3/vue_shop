@@ -34,7 +34,8 @@ import {
   TableColumn,
   Switch,
   Pagination,
-  Tooltip
+  Tooltip,
+  Dialog
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -67,6 +68,7 @@ Vue.use(TableColumn)
 Vue.use(Switch)
 Vue.use(Pagination)
 Vue.use(Tooltip)
+Vue.use(Dialog)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox

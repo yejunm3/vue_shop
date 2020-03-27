@@ -6,6 +6,7 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片 -->
     <el-card class="box-card">
       <!-- 头部 -->
       <div slot="header" class="box-card-header">
@@ -17,7 +18,7 @@
           clearable 
         ></el-input>
         <el-button icon="el-icon-search" circle @click="seachUsers"></el-button>
-        <el-button round>添加用户</el-button>
+        <el-button round @click="dialogTableVisible = true">添加用户</el-button>
       </div>
       <!-- 主体 -->
       <el-table
@@ -31,13 +32,12 @@
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
         <el-table-column prop="mobile" label="电话"></el-table-column>
-        <!-- 状态渲染 -->
+        <!--  -->
         <el-table-column prop="mg_state" label="状态">
           <template slot-scope="scope">
             <el-switch v-model="scope.row.mg_state" @change="changeState(scope.row)"></el-switch>
           </template>
         </el-table-column>
-        <!-- 操作选项 -->
         <el-table-column label="操作" width="200">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
             <el-button type="primary" size="mini" icon="el-icon-edit"></el-button>
@@ -63,6 +63,11 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 弹窗 -->
+    <el-dialog title="添加用户" :visible.sync="dialogTableVisible">
+      这里放内容
+    </el-dialog>
+
   </div>
 </template>
 
@@ -81,7 +86,8 @@ export default {
         pagesize: 2
       },
       usersList: [],
-      total: null
+      total: null,
+      dialogTableVisible: false
     }
   },
   methods: {
