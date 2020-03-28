@@ -27,7 +27,7 @@
         :default-sort="{ prop: 'id', order: 'ascending' }"
       >
         <el-table-column type="index" label="#"></el-table-column>
-        <el-table-column prop="id" label="ID"></el-table-column>
+        <el-table-column prop="id" label="ID" sortable></el-table-column>
         <el-table-column prop="role_name" label="昵称"></el-table-column>
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
@@ -64,16 +64,61 @@
       </el-pagination>
     </el-card>
     <!-- 弹窗 -->
-    <el-dialog title="添加用户" :visible.sync="dialogTableVisible">
-      这里放内容
+    <el-dialog title="添加用户" :visible.sync="dialogTableVisible" center>
+      <el-form 
+        ref="addUsersForm"
+        label-width="70px"
+        label-position="left"
+        :model="addUsers" 
+        :rules="addUsersCheck"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addUsers.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addUsers.password" show-password></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addUsers.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话" prop="mobile">
+          <el-input v-model="addUsers.mobile"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm">立即创建</el-button>
+          <el-button @click="resetForm">全部清空</el-button>
+        </el-form-item>
+      </el-form>
     </el-dialog>
-
+    <!-- end -->
   </div>
 </template>
 
 <script>
 export default {
   data() {
+    // 自定义邮箱二级校验
+    var emailPass = (rule, value, callback) => {
+      const emailReg = /^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\.[a-z]{2,}$/
+      if (value === '') {
+        callback(new Error('请输入邮箱'))
+      } else if (emailReg.test(value)) {
+        callback()
+      } else {
+        callback(new Error('邮箱格式不正确'))
+      }
+    }
+    // 自定义电话二级校验
+    var mobilePass = (rule, value, callback) => {
+      const mobileReg = /^[1]([3-9])[0-9]{9}$/
+      if (value === '') {
+        callback(new Error('请输入电话'))
+      } else if (mobileReg.test(value)) {
+        callback()
+      } else {
+        callback(new Error('电话格式不正确'))
+      }
+    }
     return {
       /**
        * 查询参数
@@ -87,7 +132,31 @@ export default {
       },
       usersList: [],
       total: null,
-      dialogTableVisible: false
+      dialogTableVisible: false,
+      addUsers: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      // 表单校验
+      addUsersCheck: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 4, max: 10, message: '长度在 4 到 10 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, validator: emailPass, trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, validator: mobilePass, trigger: 'blur' }
+        ]
+      }
+      // 
     }
   },
   methods: {
@@ -125,7 +194,35 @@ export default {
     // 搜索功能
     seachUsers() {
       this.getUsersList()
+    },
+    // 重置表单
+    resetForm() {
+      this.$refs.addUsersForm.resetFields()
+    },
+    // 提交表单
+    submitForm() {
+      this.$refs.addUsersForm.validate(async formdata => {
+        if (formdata) {
+          const { data: res } = await this.$axios.post('users', this.addUsers)
+          console.log(res)
+          if (res.meta.status === 201 ) {
+            /**
+             * 重新发起请求
+             * dialog隐藏
+             * message提示
+             */
+            this.getUsersList()
+            this.dialogTableVisible = false
+            this.$message.success(res.meta.msg)
+          } else {
+            this.$message.error(res.meta.msg)
+          }
+        } else {
+          this.$message.error('填写信息有误')
+        }
+      })
     }
+    // 
   },
   created() {
     this.getUsersList()
@@ -150,6 +247,10 @@ export default {
   }
   .el-table {
     margin-bottom: 20px;
+  }
+  .el-form {
+    width: 80%;
+    margin: 0 auto;
   }
 }
 </style>

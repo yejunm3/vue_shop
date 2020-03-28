@@ -9,8 +9,8 @@
       <el-form
         ref="form"
         :model="form"
-        class="from_box"
         :rules="loginCheck"
+        class="from_box"
         label-width="80px"
       >
         <el-form-item label="用户名:" prop="username">
@@ -40,8 +40,8 @@ export default {
         username: 'admin',
         password: '123456'
       },
+      // 设置表单验证
       loginCheck: {
-        // 设置表单验证
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { min: 4, max: 10, message: '长度在 4 到 10 个字符', trigger: 'blur' }
@@ -67,26 +67,14 @@ export default {
           const { data: res } = await this.$axios.post('login', this.form) // 解构赋值
           if (res.meta.status === 200) {
             console.log(res)
-            this.$message({
-              showClose: true,
-              message: '登录成功！',
-              type: 'success'
-            })
+            this.$message.success('登录成功！')
             window.sessionStorage.setItem('token', res.data.token)
             this.$router.push({ name: 'home' })
           } else {
-            this.$message({
-              showClose: true,
-              message: '登录失败，请稍后重试！',
-              type: 'error'
-            })
+            this.$message.error('登录失败，请稍后重试！')
           }
         } catch (err) {
-          this.$message({
-            showClose: true,
-            message: err,
-            type: 'error'
-          })
+          this.$message.error(err)
         }
       })
     },
