@@ -20,7 +20,7 @@
         <el-button icon="el-icon-search" circle @click="seachUsers"></el-button>
         <el-button round @click="dialogTableVisible = true">添加用户</el-button>
       </div>
-      <!-- 主体 -->
+      <!-- 表格 -->
       <el-table
         style="width: 100%"
         :data="usersList"
@@ -39,15 +39,17 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
-            <el-button type="primary" size="mini" icon="el-icon-edit"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
-            <el-button type="success" size="mini" icon="el-icon-check"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="top-start" :enterable="false">
-            <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
-          </el-tooltip>
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
+              <el-button type="primary" size="mini" icon="el-icon-edit" @click="editMathod(scope.row)"></el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
+              <el-button type="success" size="mini" icon="el-icon-check"></el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="删除" placement="top-start" :enterable="false">
+              <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
+            </el-tooltip>
+          </template>
         </el-table-column>
         <!--  -->
       </el-table>
@@ -63,7 +65,7 @@
       >
       </el-pagination>
     </el-card>
-    <!-- 弹窗 -->
+    <!-- 添加弹窗 -->
     <el-dialog title="添加用户" :visible.sync="dialogTableVisible" center>
       <el-form 
         ref="addUsersForm"
@@ -85,12 +87,36 @@
           <el-input v-model="addUsers.mobile"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm">立即创建</el-button>
-          <el-button @click="resetForm">全部清空</el-button>
+          <el-button type="primary" @click="submitAddForm">立即创建</el-button>
+          <el-button @click="resetAddForm">全部清空</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
-    <!-- end -->
+    <!-- 编辑弹窗 -->
+    <el-dialog title="修改用户信息" :visible.sync="dialogTableVisibleEdit" center>
+      <el-form 
+        ref="editUsersForm"
+        label-width="70px"
+        label-position="left"
+        :model="editUsers" 
+        :rules="editUsersCheck"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="editUsers.username" :disabled="true"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editUsers.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话" prop="mobile">
+          <el-input v-model="editUsers.mobile"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitEditForm">完成修改</el-button>
+          <el-button @click="resetEditForm">重置修改</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <!--  -->
   </div>
 </template>
 
@@ -133,13 +159,20 @@ export default {
       usersList: [],
       total: null,
       dialogTableVisible: false,
+      dialogTableVisibleEdit: false,
       addUsers: {
         username: '',
         password: '',
         email: '',
         mobile: ''
       },
-      // 表单校验
+      editUsers: {
+        id: '',
+        username: '',
+        email: '',
+        mobile: ''
+      },
+      // 添加表单校验
       addUsersCheck: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -149,6 +182,15 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
         ],
+        email: [
+          { required: true, validator: emailPass, trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, validator: mobilePass, trigger: 'blur' }
+        ]
+      },
+      // 修改表单校验
+      editUsersCheck: {
         email: [
           { required: true, validator: emailPass, trigger: 'blur' }
         ],
@@ -195,12 +237,12 @@ export default {
     seachUsers() {
       this.getUsersList()
     },
-    // 重置表单
-    resetForm() {
+    // 重置添加表单
+    resetAddForm() {
       this.$refs.addUsersForm.resetFields()
     },
-    // 提交表单
-    submitForm() {
+    // 提交添加表单
+    submitAddForm() {
       this.$refs.addUsersForm.validate(async formdata => {
         if (formdata) {
           const { data: res } = await this.$axios.post('users', this.addUsers)
@@ -221,8 +263,23 @@ export default {
           this.$message.error('填写信息有误')
         }
       })
+    },
+    // 修改用户信息
+    editMathod(editMsg) {
+      this.dialogTableVisibleEdit = true
+      this.editUsers.id = editMsg.id
+      this.editUsers.username = editMsg.username
+      this.editUsers.email = editMsg.email
+      this.editUsers.mobile = editMsg.mobile
+    },
+    // 重置修改表单
+    resetEditForm() {
+      this.$refs.editUsersForm.resetFields()
+    },
+    // 提交修改表单
+    submitEditForm() {
+
     }
-    // 
   },
   created() {
     this.getUsersList()
