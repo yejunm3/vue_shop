@@ -35,7 +35,8 @@ import {
   Switch,
   Pagination,
   Tooltip,
-  Dialog
+  Dialog,
+  Tag
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -69,6 +70,7 @@ Vue.use(Switch)
 Vue.use(Pagination)
 Vue.use(Tooltip)
 Vue.use(Dialog)
+Vue.use(Tag)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
