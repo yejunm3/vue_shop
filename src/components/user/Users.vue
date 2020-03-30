@@ -43,11 +43,11 @@
             <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
               <el-button type="primary" size="mini" icon="el-icon-edit" @click="editMathod(scope.row)"></el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="编辑" placement="top-start" :enterable="false">
-              <el-button type="success" size="mini" icon="el-icon-check"></el-button>
-            </el-tooltip>
             <el-tooltip class="item" effect="dark" content="删除" placement="top-start" :enterable="false">
-              <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
+              <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteMathod(scope.row.id)"></el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="更改" placement="top-start" :enterable="false">
+              <el-button type="warning" size="mini" icon="el-icon-s-tools"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -66,7 +66,7 @@
       </el-pagination>
     </el-card>
     <!-- 添加弹窗 -->
-    <el-dialog title="添加用户" :visible.sync="dialogTableVisible" center>
+    <el-dialog title="添加用户" :visible.sync="dialogTableVisible" @closed="resetAddForm" center>
       <el-form 
         ref="addUsersForm"
         label-width="70px"
@@ -93,7 +93,7 @@
       </el-form>
     </el-dialog>
     <!-- 编辑弹窗 -->
-    <el-dialog title="修改用户信息" :visible.sync="dialogTableVisibleEdit" center>
+    <el-dialog title="修改用户信息" :visible.sync="dialogTableVisibleEdit" @closed="resetEditForm" center>
       <el-form 
         ref="editUsersForm"
         label-width="70px"
@@ -146,15 +146,10 @@ export default {
       }
     }
     return {
-      /**
-       * 查询参数
-       * 当前页码
-       * 每页显示条数
-       */
       queryInfo: {
-        query: '',
-        pagenum: 1,
-        pagesize: 2
+        query: '',  // 查询参数
+        pagenum: 1, // 页码值
+        pagesize: 2 // 每页显示条数
       },
       usersList: [],
       total: null,
@@ -207,10 +202,10 @@ export default {
       const { data: res } = await this.$axios.get('users', {
         params: this.queryInfo
       })
+      console.log(res.data)
       if (res.meta.status !== 200) return this.$message.error('获取列表失败')
       this.usersList = res.data.users
       this.total = res.data.total
-      console.log(res.data)
     },
     // 监听分页 页码值变化
     handleCurrentChange(newNum) {
@@ -225,13 +220,13 @@ export default {
     // 修改用户状态 失败时值取反
     async changeState(stateMsg) {
       const { data: res } = await this.$axios.put(`users/${stateMsg.id}/state/${stateMsg.mg_state}`)
+      console.log(res)
       if (res.meta.status !== 200) {
         stateMsg.mg_state = !stateMsg.mg_state
         return this.$message.error('更新状态失败')
       } else {
         this.$message.success('更新状态成功')
       }
-      console.log(res)
     },
     // 搜索功能
     seachUsers() {
@@ -244,23 +239,15 @@ export default {
     // 提交添加表单
     submitAddForm() {
       this.$refs.addUsersForm.validate(async formdata => {
-        if (formdata) {
-          const { data: res } = await this.$axios.post('users', this.addUsers)
-          console.log(res)
-          if (res.meta.status === 201 ) {
-            /**
-             * 重新发起请求
-             * dialog隐藏
-             * message提示
-             */
-            this.getUsersList()
-            this.dialogTableVisible = false
-            this.$message.success(res.meta.msg)
-          } else {
-            this.$message.error(res.meta.msg)
-          }
+        if (!formdata) return
+        const { data: res } = await this.$axios.post('users', this.addUsers)
+        console.log(res)
+        if (res.meta.status === 201 ) {
+          this.getUsersList()
+          this.dialogTableVisible = false
+          this.$message.success(res.meta.msg)
         } else {
-          this.$message.error('填写信息有误')
+          this.$message.error(res.meta.msg)
         }
       })
     },
@@ -278,8 +265,44 @@ export default {
     },
     // 提交修改表单
     submitEditForm() {
-
+      this.$refs.editUsersForm.validate(async formdata => {
+        if (!formdata) return
+        const { data: res } = await this.$axios.put(
+          `users/${this.editUsers.id}`,
+          {
+            email: this.editUsers.email,
+            mobile: this.editUsers.mobile
+          }
+        )
+        console.log(res)
+        if (res.meta.status === 200) {
+          this.getUsersList()
+          this.dialogTableVisibleEdit = false
+          this.$message.success(res.meta.msg)
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      })
+    },
+    // 删除用户信息
+    deleteMathod(id) {
+      this.$confirm('该信息将会被永久删除', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      .then(async () => {
+        const { data: res } = await this.$axios.delete(`users/${id}`)
+        console.log(res)
+        if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        this.getUsersList()
+        this.$message.success(res.meta.msg)
+      })
+      .catch(() => {
+        this.$message.info('已取消操作')
+      })
     }
+    // 
   },
   created() {
     this.getUsersList()
