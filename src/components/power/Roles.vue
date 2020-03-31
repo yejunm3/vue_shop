@@ -44,7 +44,7 @@
           <template slot-scope="scope">
             <el-button type="primary" size="mini" icon="el-icon-edit" @click="showEditRoles(scope.row.id)">编辑</el-button>
             <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteRoles(scope.row.id)">删除</el-button>
-            <el-button type="warning" size="mini" icon="el-icon-s-tools" @click="changeRoles(scope.row.id)">修改权限</el-button>
+            <el-button type="warning" size="mini" icon="el-icon-s-tools" @click="showChangeRoles(scope.row)">修改权限</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -95,15 +95,18 @@
       </el-form>
     </el-dialog>
     <!-- 修改权限 -->
-    <el-dialog title="修改角色权限" :visible.sync="changeRolesDialog" left>
+    <el-dialog title="修改角色权限" :visible.sync="changeRolesDialog" @closed="hideChangeRoles" left>
       <el-tree 
       :data="rolesTree" 
       :props="rolesTreeProps"
-      :default-expand-all="true"
-      :default-checked-keys="[101]"
+      :default-checked-keys="rolesTreeChecked"
       node-key="id"
       show-checkbox
       ></el-tree>
+      <el-row class="button-group" type="flex" justify="end">
+        <el-button type="primary" @click="submitRolesTree">完成修改</el-button>
+        <el-button @click="hideChangeRoles">取消修改</el-button>
+      </el-row>
     </el-dialog>
   </div>
 </template>
@@ -131,10 +134,13 @@ export default {
       // 修改权限
       changeRolesDialog: false,
       rolesTree: '',
-      rolesTreeProps: {         // 树形控件绑定对象
-          children: 'children', // 子属性
-          label: 'authName'     // 属性名
-      }
+      // 树形控件绑定对象
+      rolesTreeProps: {
+          children: 'children',
+          label: 'authName'
+      },
+      // 树形控件默认选中
+      rolesTreeChecked: []
     }
   },
   methods: {
@@ -232,12 +238,34 @@ export default {
       })
     },
     // 展示权限弹窗
-    async changeRoles() {
+    async showChangeRoles(scopeMsg) {
+      this.getRolesTreeChecked(scopeMsg, this.rolesTreeChecked)
+      console.log(this.rolesTreeChecked)
+      // 
       const { data: res } = await this.$axios.get('rights/tree')
       console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.rolesTree = res.data
       this.changeRolesDialog = true
+    },
+    // 递归获取获取第3级嵌套的id
+    getRolesTreeChecked(node, arr) {
+      if (!node.children) {
+        arr.push(node.id)
+      } else {
+        node.children.forEach(item => {
+          this.getRolesTreeChecked(item, arr)
+        })
+      }
+    },
+    // 取消权限弹窗
+    hideChangeRoles() {
+      this.rolesTreeChecked = []
+      this.changeRolesDialog = false
+    },
+    // 提交修改权限
+    submitRolesTree() {
+
     }
     // 
   },
@@ -262,5 +290,8 @@ export default {
 .el-form {
   width: 80%;
   margin: 0 auto;
+}
+.button-group {
+  margin-top: 30px;
 }
 </style>
