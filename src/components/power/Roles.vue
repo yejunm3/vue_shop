@@ -97,14 +97,16 @@
     <!-- 修改权限 -->
     <el-dialog title="修改角色权限" :visible.sync="changeRolesDialog" @closed="hideChangeRoles" left>
       <el-tree 
+      ref="rolesTreeList"
       :data="rolesTree" 
       :props="rolesTreeProps"
+      :default-expand-all="true"
       :default-checked-keys="rolesTreeChecked"
       node-key="id"
       show-checkbox
       ></el-tree>
       <el-row class="button-group" type="flex" justify="end">
-        <el-button type="primary" @click="submitRolesTree">完成修改</el-button>
+        <el-button type="primary" @click="allotRolesTree">完成修改</el-button>
         <el-button @click="hideChangeRoles">取消修改</el-button>
       </el-row>
     </el-dialog>
@@ -140,7 +142,8 @@ export default {
           label: 'authName'
       },
       // 树形控件默认选中
-      rolesTreeChecked: []
+      rolesTreeChecked: [],
+      rolesTreeId: ''
     }
   },
   methods: {
@@ -153,6 +156,8 @@ export default {
     },
     // 删除tags
     async closeHandle(rowMsg, rightId) {
+      console.log(rightId)
+      // 
       this.$confirm('是否删除此条权限', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -240,7 +245,9 @@ export default {
     // 展示权限弹窗
     async showChangeRoles(scopeMsg) {
       this.getRolesTreeChecked(scopeMsg, this.rolesTreeChecked)
-      console.log(this.rolesTreeChecked)
+      this.rolesTreeId = scopeMsg.id
+      // console.log(this.rolesTreeChecked)
+      // console.log(this.rolesTreeId)
       // 
       const { data: res } = await this.$axios.get('rights/tree')
       console.log(res)
@@ -261,11 +268,31 @@ export default {
     // 取消权限弹窗
     hideChangeRoles() {
       this.rolesTreeChecked = []
+      this.rolesTreeId = ''
       this.changeRolesDialog = false
     },
     // 提交修改权限
-    submitRolesTree() {
-
+    allotRolesTree() {
+      // console.log(this.$refs.rolesTreeList.getCheckedKeys())
+      // console.log(this.$refs.rolesTreeList.getHalfCheckedNodes())
+      // 这里使用展开运算符 将 已选中节点和半选中节点合并为一个数组
+      let allotList = [
+        ...this.$refs.rolesTreeList.getCheckedKeys(),
+        ...this.$refs.rolesTreeList.getHalfCheckedKeys()
+      ]
+      console.log(allotList.join(','))
+      this.$axios.post(
+        `roles/${this.rolesTreeId}/rights`,
+        {
+          rids: allotList.join(',')
+        }
+      ).then(res => {
+        if (res.data.meta.status !== 200) {
+          console.log(123)
+        } else {
+          console.log(res.data.meta.msg)
+        }
+      })
     }
     // 
   },
