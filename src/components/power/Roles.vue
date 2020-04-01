@@ -280,17 +280,20 @@ export default {
         ...this.$refs.rolesTreeList.getCheckedKeys(),
         ...this.$refs.rolesTreeList.getHalfCheckedKeys()
       ]
-      console.log(allotList.join(','))
+      // console.log(allotList.join(','))
       this.$axios.post(
         `roles/${this.rolesTreeId}/rights`,
         {
           rids: allotList.join(',')
         }
       ).then(res => {
+        console.log(res)
         if (res.data.meta.status !== 200) {
-          console.log(123)
+          this.$message.error('更新权限失败')
         } else {
-          console.log(res.data.meta.msg)
+          this.getRolesList()
+          this.hideChangeRoles()
+          this.$message.success('更新权限成功')
         }
       })
     }

@@ -28,7 +28,7 @@
       >
         <el-table-column type="index" label="#"></el-table-column>
         <el-table-column prop="id" label="ID" sortable></el-table-column>
-        <el-table-column prop="role_name" label="昵称"></el-table-column>
+        <el-table-column prop="role_name" label="角色"></el-table-column>
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
         <el-table-column prop="mobile" label="电话"></el-table-column>
@@ -46,8 +46,8 @@
             <el-tooltip class="item" effect="dark" content="删除" placement="top-start" :enterable="false">
               <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteMathod(scope.row.id)"></el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="更改" placement="top-start" :enterable="false">
-              <el-button type="warning" size="mini" icon="el-icon-s-tools"></el-button>
+            <el-tooltip class="item" effect="dark" content="更改角色" placement="top-start" :enterable="false">
+              <el-button type="warning" size="mini" icon="el-icon-s-tools" @click="checkMathod(scope.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -116,6 +116,33 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <!-- 分配角色弹窗 -->
+    <el-dialog title="更改角色" :visible.sync="dialogTableVisibleCheck" @closed="rolesDialogHide" class="roles-box" center>
+      <div class="roles-box-item">
+        <el-row>
+          <el-col :span="5">当前角色：</el-col>
+          <el-col :span="19">{{usersRolesMsg.role_name}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="5">当前用户：</el-col>
+          <el-col :span="19">{{usersRolesMsg.username}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="5">选择角色：</el-col>
+          <el-col :span="19">
+            <el-select v-model="usersRolesValue" placeholder="请选择">
+              <el-option v-for="item in usersRolesList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row type="flex" justify="end">
+          <el-col :span="19">
+            <el-button type="primary" @click="rolesCheckSubmit">确定</el-button>
+            <el-button @click="rolesDialogHide">取消</el-button>
+          </el-col>
+        </el-row>
+      </div>
+    </el-dialog>
     <!--  -->
   </div>
 </template>
@@ -146,28 +173,26 @@ export default {
       }
     }
     return {
+      /**
+       * 查询参数
+       * 页码值
+       * 每页显示条数
+       */
       queryInfo: {
-        query: '',  // 查询参数
-        pagenum: 1, // 页码值
-        pagesize: 2 // 每页显示条数
+        query: '',
+        pagenum: 1,
+        pagesize: 2
       },
       usersList: [],
       total: null,
+      // 添加表单
       dialogTableVisible: false,
-      dialogTableVisibleEdit: false,
       addUsers: {
         username: '',
         password: '',
         email: '',
         mobile: ''
       },
-      editUsers: {
-        id: '',
-        username: '',
-        email: '',
-        mobile: ''
-      },
-      // 添加表单校验
       addUsersCheck: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -184,7 +209,14 @@ export default {
           { required: true, validator: mobilePass, trigger: 'blur' }
         ]
       },
-      // 修改表单校验
+      // 修改表单
+      dialogTableVisibleEdit: false,
+      editUsers: {
+        id: '',
+        username: '',
+        email: '',
+        mobile: ''
+      },
       editUsersCheck: {
         email: [
           { required: true, validator: emailPass, trigger: 'blur' }
@@ -192,7 +224,17 @@ export default {
         mobile: [
           { required: true, validator: mobilePass, trigger: 'blur' }
         ]
-      }
+      },
+      /**
+       * 更改角色
+       * 当前行的信息
+       * 请求到的列表
+       * 被选中的值
+       */
+      dialogTableVisibleCheck: false,
+      usersRolesMsg: '',
+      usersRolesList: [],
+      usersRolesValue: ''
       // 
     }
   },
@@ -301,6 +343,36 @@ export default {
       .catch(() => {
         this.$message.info('已取消操作')
       })
+    },
+    // 分配角色弹窗
+    async checkMathod(scopeMsg) {
+      console.log(scopeMsg)
+      this.usersRolesMsg = scopeMsg
+      this.usersRolesValue = scopeMsg.role_name
+      this.dialogTableVisibleCheck = true
+      // 
+      const { data: res } = await this.$axios.get('roles')
+      if (res.meta.status !== 200) return this.$message.error('获取角色列表失败')
+      this.usersRolesList = res.data
+      console.log(this.usersRolesList)
+    },
+    // 重置分配弹窗
+    rolesDialogHide() {
+      this.dialogTableVisibleCheck = false
+    },
+    // 发起更改请求
+    async rolesCheckSubmit() {
+      const { data: res } = await this.$axios.put(
+        `users/${this.usersRolesMsg.id}/role`,
+        {
+          rid: this.usersRolesValue
+        }
+      )
+      console.log(res)
+      if (res.meta.status !==200) return this.$message.error(res.meta.msg)
+      this.getUsersList()
+      this.rolesDialogHide()
+      this.$message.success(res.meta.msg)
     }
     // 
   },
@@ -331,6 +403,20 @@ export default {
   .el-form {
     width: 80%;
     margin: 0 auto;
+  }
+  .roles-box {
+    .el-dialog {
+      width: 40%;
+      .roles-box-item {
+        width: 80%;
+        margin: 0 auto;
+        font-size: 16px;
+        line-height: 40px;
+        .el-button {
+          margin-top: 20px;
+        }
+      }
+    }
   }
 }
 </style>
