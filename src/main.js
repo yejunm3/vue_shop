@@ -12,6 +12,11 @@ import './assets/fonts/iconfont.css'
 // 全局样式
 import './assets/css/global.css'
 
+// 树状表格
+import ZkTable from 'vue-table-with-tree-grid'
+// Vue.use(ZkTable)
+Vue.component('ZkTable', ZkTable)
+
 // this.$axios
 import axios from 'axios'
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'

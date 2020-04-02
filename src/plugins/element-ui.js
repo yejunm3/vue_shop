@@ -40,7 +40,8 @@ import {
   Divider,
   Tree,
   Select,
-  Option
+  Option,
+  Cascader
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -79,6 +80,7 @@ Vue.use(Divider)
 Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Cascader)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
