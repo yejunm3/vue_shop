@@ -173,7 +173,7 @@ export default {
     async getCascaderList() {
       const { data: res } = await this.$axios.get('categories')
       // console.log(res)
-      // if (res.meta.status !== 200) return this.$message.error('获取下拉列表失败')
+      if (res.meta.status !== 200) return this.$message.error('获取下拉列表失败')
       this.cascaderList = res.data
     },
     getCascaderValue(value) {
