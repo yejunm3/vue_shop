@@ -65,6 +65,25 @@
       </el-form>
     </el-dialog>
 
+    <!-- 编辑分类 -->
+    <el-dialog title="编辑商品分类" :visible.sync="editDialog" center>
+      <el-form ref="editSortForm" label-width="80px" label-position="right" :model="editSortMsg">
+        <el-form-item label="分类ID" prop="id">
+          <el-input v-model="addSortMsg.id"></el-input>
+        </el-form-item>
+        <el-form-item label="分类名称" prop="cat_name">
+          <el-input v-model="addSortMsg.cat_name"></el-input>
+        </el-form-item>
+        <el-form-item label="分类层级">
+          <el-cascader v-model="cascaderValue" :options="cascaderList" :props="cascaderProps" @change="getCascaderValue"></el-cascader>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="addSort">立即添加</el-button>
+          <el-button @click="resetAddSort">全部重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -128,6 +147,15 @@ export default {
         cat_pid: [
           { required: true, message: '请选择商品分类', trigger: 'blur' },
         ]
+      },
+      /**
+       * 修改商品弹窗
+       * 修改商品信息
+       */
+      editDialog: false,
+      editSortMsg: {
+        id: '',
+        cat_name: ''
       },
       /**
        * 所有下拉列表
@@ -213,9 +241,12 @@ export default {
       this.addSortMsg.cat_pid = ''
       this.addSortMsg.cat_level = ''
     },
-    // 
+    /**
+     * 编辑分类dialog展现
+     */
     showEditSort(scope) {
       console.log(scope)
+      this.editDialog = true
     },
     // 删除分类
     async deleteSort(id) {
