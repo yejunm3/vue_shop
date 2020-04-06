@@ -112,7 +112,7 @@ export default {
         },
         {
           label: '是否有效',
-          type: 'template',   // 渲染为自定义列
+          type: 'template', // 渲染为自定义列
           template: 'valid' // 指定插槽名称 相当于设置了 <slot name="isvalid"></slot>
         },
         {
