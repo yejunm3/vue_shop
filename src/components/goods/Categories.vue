@@ -50,7 +50,7 @@
     </el-card>
 
     <!-- 添加分类 -->
-    <el-dialog title="添加商品分类" :visible.sync="addDialog" @close="resetAddSort" center>
+    <el-dialog title="添加商品分类" :visible.sync="addDialog" @closed="resetAddSort" center>
       <el-form ref="addSortForm" label-width="80px" label-position="right" :model="addSortMsg" :rules="addSortRules">
         <el-form-item label="分类名称" prop="cat_name">
           <el-input v-model="addSortMsg.cat_name"></el-input>
@@ -66,20 +66,17 @@
     </el-dialog>
 
     <!-- 编辑分类 -->
-    <el-dialog title="编辑商品分类" :visible.sync="editDialog" center>
-      <el-form ref="editSortForm" label-width="80px" label-position="right" :model="editSortMsg">
-        <el-form-item label="分类ID" prop="id">
-          <el-input v-model="addSortMsg.id"></el-input>
+    <el-dialog title="编辑商品分类" :visible.sync="editDialog" @closed="resetEditSort" center>
+      <el-form ref="editSortForm" label-width="80px" label-position="right" :model="editSortMsg" :rules="editSortRules">
+        <el-form-item label="分类ID">
+          <el-input v-model="editSortMsg.cat_id" :disabled="true"></el-input>
         </el-form-item>
         <el-form-item label="分类名称" prop="cat_name">
-          <el-input v-model="addSortMsg.cat_name"></el-input>
-        </el-form-item>
-        <el-form-item label="分类层级">
-          <el-cascader v-model="cascaderValue" :options="cascaderList" :props="cascaderProps" @change="getCascaderValue"></el-cascader>
+          <el-input v-model="editSortMsg.cat_name"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="addSort">立即添加</el-button>
-          <el-button @click="resetAddSort">全部重置</el-button>
+          <el-button type="primary" @click="editSort">提交修改</el-button>
+          <el-button @click="resetEditSort">重置修改</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -130,6 +127,18 @@ export default {
         }
       ],
       /**
+       * 所有下拉列表
+       * 下拉列表的值（返回cat_pid和cat_level）
+       * 下拉列表配置
+       */
+      cascaderList: [],
+      cascaderValue: [],
+      cascaderProps: {
+        label: 'cat_name',
+        value: 'cat_id',
+        checkStrictly: true
+      },
+      /**
        * 添加商品弹窗
        * 添加商品信息
        * 添加商品校验
@@ -151,24 +160,19 @@ export default {
       /**
        * 修改商品弹窗
        * 修改商品信息
+       * 修改商品校验
        */
       editDialog: false,
       editSortMsg: {
-        id: '',
+        cat_id: '',
         cat_name: ''
       },
-      /**
-       * 所有下拉列表
-       * 下拉列表的值（返回cat_pid和cat_level）
-       * 下拉列表配置
-       */
-      cascaderList: [],
-      cascaderValue: [],
-      cascaderProps: {
-        label: 'cat_name',
-        value: 'cat_id',
-        checkStrictly: true
+      editSortRules: {
+        cat_name: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' },
+        ]
       }
+      // 
     }
   },
   methods: {
@@ -243,10 +247,29 @@ export default {
     },
     /**
      * 编辑分类dialog展现
+     * 提交编辑分类表单
+     * 重置编辑分类表单
      */
     showEditSort(scope) {
-      console.log(scope)
       this.editDialog = true
+      this.editSortMsg.cat_id = scope.cat_id
+      this.editSortMsg.cat_name = scope.cat_name
+    },
+    editSort() {
+      this.$refs.editSortForm.validate(async fromdata => {
+        if (fromdata) {
+          const { data: res } = await this.$axios.put('categories/' + this.editSortMsg.cat_id, { cat_name: this.editSortMsg.cat_name })
+          console.log(res)
+          if (res.meta.status !== 200) return this.$message.error('更新分类失败')
+          this.getShopSort()
+          this.editDialog = false
+          this.$message.success('更新分类成功')
+          console.log(this.editSortMsg)
+        }
+      })
+    },
+    resetEditSort() {
+      this.$refs.editSortForm.resetFields()
     },
     // 删除分类
     async deleteSort(id) {
