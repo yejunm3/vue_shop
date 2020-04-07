@@ -6,6 +6,7 @@ import users from '../components/user/Users.vue'
 import roles from '../components/power/Roles.vue'
 import rights from '../components/power/Rights.vue'
 import categories from '../components/goods/Categories'
+import goods from '../components/goods/Goods'
 
 Vue.use(VueRouter)
 
@@ -21,7 +22,8 @@ const routes = [
       { path: 'users', component: users },
       { path: 'roles', component: roles },
       { path: 'rights', component: rights },
-      { path: 'categories', component: categories }
+      { path: 'categories', component: categories },
+      { path: 'goods', component: goods }
     ]
   }
 ]

@@ -14,7 +14,6 @@ import './assets/css/global.css'
 
 // 树状表格
 import ZkTable from 'vue-table-with-tree-grid'
-// Vue.use(ZkTable)
 Vue.component('ZkTable', ZkTable)
 
 // this.$axios
@@ -30,6 +29,12 @@ axios.interceptors.request.use(
   }
 )
 Vue.prototype.$axios = axios
+
+// 全局过滤器
+import moment from 'moment'
+Vue.filter('dateFilter', (dateMsg, filterModel = 'YYYY-MM-DD') => {
+  return moment(dateMsg).format(filterModel)
+})
 
 // 消息提示的环境配置，设置为开发环境或者生产环境
 Vue.config.productionTip = false

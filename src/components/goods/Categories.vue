@@ -55,7 +55,7 @@
         <el-form-item label="分类名称" prop="cat_name">
           <el-input v-model="addSortMsg.cat_name"></el-input>
         </el-form-item>
-        <el-form-item label="分类层级" prop="cat_pid">
+        <el-form-item label="选择父级">
           <el-cascader v-model="cascaderValue" :options="cascaderList" :props="cascaderProps" @change="getCascaderValue"></el-cascader>
         </el-form-item>
         <el-form-item>
@@ -140,21 +140,18 @@ export default {
       },
       /**
        * 添加商品弹窗
-       * 添加商品信息
+       * 添加商品信息（设置默认值）
        * 添加商品校验
        */
       addDialog: false,
       addSortMsg: {
         cat_name: '',
-        cat_pid: '',
-        cat_level: '',
+        cat_pid: 0,
+        cat_level: 0,
       },
       addSortRules: {
         cat_name: [
           { required: true, message: '请输入分类名称', trigger: 'blur' },
-        ],
-        cat_pid: [
-          { required: true, message: '请选择商品分类', trigger: 'blur' },
         ]
       },
       /**
@@ -201,31 +198,35 @@ export default {
     /**
      * 获取下拉列表所有内容
      * 根据返回值获取父级id、等级
+     *  1）不选择，为第一级，父级id和等级均为"0"
+     *  2）选择一级，为第二级，父级id为上一级id（第一级的），等级为"1"
+     *  3）选择二级、三级，均为第三级，父级id为上一级id（第二级的，没有第三级），等级为"2"
      */
     async getCascaderList() {
       const { data: res } = await this.$axios.get('categories')
-      // console.log(res)
+      console.log(res)
       if (res.meta.status !== 200) return this.$message.error('获取下拉列表失败')
       this.cascaderList = res.data
     },
     getCascaderValue(value) {
       if (value.length === 1) {
-        this.addSortMsg.cat_pid = 0
-        this.addSortMsg.cat_level = value.length
+        this.addSortMsg.cat_pid = value[0]
+        this.addSortMsg.cat_level = 1
       } else {
-        this.addSortMsg.cat_pid = value[value.length - 2]
-        this.addSortMsg.cat_level = value.length - 1
+        this.addSortMsg.cat_pid = value[1]
+        this.addSortMsg.cat_level = 2
       }
-      // console.log(value)
+      console.log(value)
       console.log(this.addSortMsg)
     },
     /**
-     * 添加分类dialog展现
+     * 添加分类dialog展现（此时获取下拉列表）
      * 提交添加分类表单
      * 重置添加分类表单
      */
     showAddDialog() {
-      this.addDialog = !this.addDialog
+      this.addDialog = true
+      this.getCascaderList()
     },
     addSort() {
       this.$refs.addSortForm.validate(async formdata => {
@@ -234,7 +235,7 @@ export default {
           console.log(res)
           if (res.meta.status !== 201) return this.$message.error('添加分类失败')
           this.getShopSort()
-          this.showAddDialog()
+          this.addDialog = false
           this.$message.success('添加分类成功')
         }
       })
@@ -292,7 +293,6 @@ export default {
   },
   created() {
     this.getShopSort()
-    this.getCascaderList()
   }
 }
 </script>
