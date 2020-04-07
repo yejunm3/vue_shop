@@ -41,7 +41,8 @@ import {
   Tree,
   Select,
   Option,
-  Cascader
+  Cascader,
+  Link
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -81,6 +82,7 @@ Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
 Vue.use(Cascader)
+Vue.use(Link)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
