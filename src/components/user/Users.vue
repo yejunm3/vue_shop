@@ -388,7 +388,7 @@ export default {
     margin-bottom: 10px;
   }
   .el-card__header {
-    padding: 13px 20px;
+    padding: 15px 20px;
     .box-card-header {
       display: flex;
       .el-input {
@@ -398,7 +398,7 @@ export default {
     }
   }
   .el-table {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
   .el-form {
     width: 80%;

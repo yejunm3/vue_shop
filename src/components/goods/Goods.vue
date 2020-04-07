@@ -12,7 +12,7 @@
       <div slot="header" class="box-card-header">
         <el-input v-model="goodsQuery.query" @clear="getGoodsList" @keyup.native.enter="getGoodsList" placeholder="请输入内容" clearable></el-input>
         <el-button icon="el-icon-search" @click="getGoodsList" circle></el-button>
-        <el-button round>添加商品</el-button>
+        <el-button @click="addShops" round>添加商品</el-button>
       </div>
       <!-- 表格 -->
       <el-table :data="goodsList" border>
@@ -83,6 +83,10 @@ export default {
     handleSizeChange(value) {
       this.goodsQuery.pagesize = value
       this.getGoodsList()
+    },
+    // 添加商品路由跳转
+    addShops() {
+      this.$router.push({ name: 'addgoods' })
     }
   },
   created() {
@@ -97,7 +101,7 @@ export default {
     margin-bottom: 10px;
   }
   .el-card__header {
-    padding: 13px 20px;
+    padding: 15px 20px;
     border-bottom: none;
     .box-card-header {
       display: flex;
@@ -109,6 +113,9 @@ export default {
   }
   .el-card__body {
       padding: 0 20px 20px;
+  }
+  .el-table {
+    margin-bottom: 15px;
   }
 }
 </style>
