@@ -42,7 +42,9 @@ import {
   Select,
   Option,
   Cascader,
-  Link
+  Link,
+  Tabs,
+  TabPane
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -83,6 +85,8 @@ Vue.use(Select)
 Vue.use(Option)
 Vue.use(Cascader)
 Vue.use(Link)
+Vue.use(Tabs)
+Vue.use(TabPane)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
