@@ -26,13 +26,16 @@
         <el-tab-pane label="动态参数" name="only">
           <el-button plain :disabled="isDisabledButton">添加动态参数</el-button>
           <el-table :data="activeParams" border>
+            <!-- 下拉 -->
             <el-table-column type="expand">
               <template slot-scope="scope">
                 {{scope.row}}
               </template>
             </el-table-column>
-            <el-table-column type="index" label="#"></el-table-column>
+            <el-table-column type="index" label="#" width="120"></el-table-column>
+            <el-table-column prop="cat_id" label="所属分类" width="120"></el-table-column>
             <el-table-column prop="attr_name" label="参数名称"></el-table-column>
+            <!-- 操作 -->
             <el-table-column label="操作">
               <el-button type="primary" size="mini" icon="el-icon-edit">编辑</el-button>
               <el-button type="danger" size="mini" icon="el-icon-edit">编辑</el-button>
