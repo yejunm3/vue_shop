@@ -133,6 +133,7 @@ export default {
       // 参数表格
       activeParams: [],
       staticParams: [],
+      isRequest: true,
       // 添加参数
       addParamsDialog: false,
       addParams: {
@@ -187,12 +188,18 @@ export default {
     shopsValueChange(id) {
       this.shopsId = id
       this.getAttributesList()
+      this.isReques = true            // 当重新获取所属分类id时，重置
     },
     // 监听切换事件（获取sel）
     attributeTypeChange(tab) {
       this.attributeType = tab.name
       if (this.shopsId === '') return
-      this.getAttributesList()
+      // this.getAttributesList()
+      if (this.isReques) {           // 切换时发起了a类请求，再点发起b类的（只允许在请求一次），分类id改变时重置
+        this.attributeType = tab.name
+        this.getAttributesList()
+        this.isReques = false
+      }
     },
     /**
      * 展现添加弹窗
