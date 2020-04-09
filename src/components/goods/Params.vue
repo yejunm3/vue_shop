@@ -24,12 +24,25 @@
         <el-tab-pane label="动态参数" name="only">
           <el-button plain :disabled="isDisabledButton" @click="showAddParams">添加动态参数</el-button>
           <el-table :data="activeParams" border>
-            <!-- 下拉 -->
+            <!-- 下拉start -->
             <el-table-column type="expand">
               <template slot-scope="scope">
-                {{scope.row}}
+                <el-tag :key="item" v-for="item in scope.row.attr_vals" closable>{{item}}</el-tag>
+                <el-input 
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                  clearable
+                >
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
               </template>
             </el-table-column>
+            <!-- 下拉end -->
             <el-table-column type="index" label="#" width="120"></el-table-column>
             <el-table-column prop="attr_id" label="参数id" width="120"></el-table-column>
             <el-table-column prop="cat_id" label="所属分类" width="120"></el-table-column>
@@ -79,7 +92,7 @@
         <el-form-item :label="isInputName" prop="attr_name">
           <el-input v-model="addParams.attr_name"></el-input>
         </el-form-item>
-        <el-form-item label="参数选项" v-show="addParams.attr_sel === 'many'">
+        <el-form-item label="参数选项">
           <el-input v-model="addParams.attr_vals"></el-input>
         </el-form-item>
         <el-form-item>
@@ -104,7 +117,7 @@
         <el-form-item :label="isInputName" prop="attr_name">
           <el-input v-model="editParams.attr_name"></el-input>
         </el-form-item>
-        <el-form-item label="参数选项" v-show="editParams.attr_sel === 'many'">
+        <el-form-item label="参数选项">
           <el-input v-model="editParams.attr_vals"></el-input>
         </el-form-item>
         <el-form-item>
@@ -121,7 +134,7 @@
 export default {
   data() {
     return {
-      shopsId: '',
+      shopsId: 6,
       attributeType: 'only',
       // 下拉列表
       shopsList: [],
@@ -175,6 +188,13 @@ export default {
       const { data: res } = await this.$axios.get(`categories/${this.shopsId}/attributes`, { params: { sel: this.attributeType } })
       console.log(res)
       if (res.meta.status === 200) {
+        // 动态tags添加自定义属性
+        res.data.forEach(item => {
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : '' // 分割为数组
+          item.inputVisible = false // 定义input显示
+          item.inputValue = ''      // 定义input值
+        })
+        // 表格数据
         if (this.attributeType === 'only') {
           this.activeParams = res.data
         } else {
@@ -195,10 +215,10 @@ export default {
       this.attributeType = tab.name
       if (this.shopsId === '') return
       // this.getAttributesList()
-      if (this.isReques) {           // 切换时发起了a类请求，再点发起b类的（只允许在请求一次），分类id改变时重置
+      if (this.isRequest) {           // 切换时发起了a类请求，再点发起b类的（只允许在请求一次），分类id改变时重置
         this.attributeType = tab.name
         this.getAttributesList()
-        this.isReques = false
+        this.isRequest = false
       }
     },
     /**
@@ -231,7 +251,7 @@ export default {
       this.editParamsAttrId = scope.attr_id
       this.editParams.attr_name = scope.attr_name
       this.editParams.attr_sel = scope.attr_sel
-      this.editParams.attr_vals = scope.attr_vals
+      this.editParams.attr_vals = scope.attr_vals.join(' ')
       this.editParamsDialog = true
     },
     submitEditParams() {
@@ -264,7 +284,21 @@ export default {
       }).catch(() => {
         this.$message.info('取消操作')      
       })
+    },
+    // 按钮点击，tags输入框展现，并且默认选中
+    showInput(scope) {
+      scope.inputVisible = true
+      this.$nextTick( () => { // $nextTick 方法，就是当页面上元素被重新渲染之后，才会指定回调函数中的代码
+        this.$refs.saveTagInput.focus()
+      })
+    },
+    // tags输入框 enter或者失焦时触发，若输入值为空则return
+    handleInputConfirm(scope) {
+      scope.inputVisible = false
+      if (scope.inputValue.trim() === '' ) return
+      console.log(scope.inputValue)
     }
+    // 
   },
   computed: {
     // 判断按钮是否禁用
@@ -289,6 +323,7 @@ export default {
   },
   created() {
     this.getShopsList()
+    this.getAttributesList()
   }
 }
 </script>
@@ -303,5 +338,17 @@ export default {
 .el-form {
   width: 80%;
   margin: 0 auto;
+}
+.el-tag {
+  margin-right: 10px;
+}
+.input-new-tag {
+  display: inline-block;
+  width: 90px;
+  height: 32px;
+}
+.button-new-tag {
+  height: 32px;
+  padding: 0 15px;
 }
 </style>
