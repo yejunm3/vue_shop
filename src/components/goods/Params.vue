@@ -260,6 +260,7 @@ export default {
     },
     /**
      * 展现编辑弹窗
+     * 提交编辑弹窗
      * 重置编辑弹窗
      */
     showEditParams(scope) {

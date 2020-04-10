@@ -35,8 +35,10 @@
         <el-table-column prop="goods_number" label="数量"></el-table-column>
         <el-table-column prop="goods_weight" label="重量"></el-table-column>
         <el-table-column label="操作" width="120" fixed="right">
-          <el-button type="primary" size="mini" icon="el-icon-edit"></el-button>
-          <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" icon="el-icon-edit" @click="editShops(scope.row)"></el-button>
+            <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteShops(scope.row)"></el-button>
+          </template>
         </el-table-column>
       </el-table>
       <!-- 分页 -->
@@ -50,6 +52,7 @@
         :total="total"
       ></el-pagination>
     </el-card>
+
   </div>
 </template>
 
@@ -67,6 +70,11 @@ export default {
     }
   },
   methods: {
+    /**
+     * 获取商品列表
+     * 监听页码值变化
+     * 监听每页显示数量
+     */
     async getGoodsList() {
       const { data: res } = await this.$axios.get('goods', { params: this.goodsQuery })
       console.log(res)
@@ -74,23 +82,54 @@ export default {
       this.goodsList = res.data.goods
       this.total = res.data.total
     },
-    // 监听页码值变化
     handleCurrentChange(value) {
       this.goodsQuery.pagenum = value
       this.getGoodsList()
     },
-    // 监听每页显示数量
     handleSizeChange(value) {
       this.goodsQuery.pagesize = value
       this.getGoodsList()
     },
-    // 添加商品路由跳转
+    /**
+     * 添加商品路由跳转
+     * 编辑商品路由跳转
+     */
     addShops() {
       this.$router.push({ name: 'addgoods' })
+    },
+    editShops(scope) {
+      console.log(scope)
+    },
+    // 删除商品
+    async deleteShops(scope) {
+      // this.$confirm('是否删除此商品', '警告', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消',
+      //   type: 'warning'
+      // }).then(async () => {
+      //   const { data: res } = await this.$axios.delete('goods/' + scope.goods_id)
+      //   console.log(res)
+      //   if (res.meta.status !== 200) this.$message.error('删除失败')
+      //   this.getGoodsList()
+      //   this.$message.success('删除成功')
+      // }).catch(() => {
+      //   this.$message.info('取消操作')      
+      // })
+      const data = await this.$confirm('是否删除此商品', '警告', { // 返回一个promise
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (data !== 'confirm') return this.$message.info('取消操作')
+      const { data: res } = await this.$axios.delete('goods/' + scope.goods_id)
+      if (res.meta.status !== 200) return this.$message.error('删除失败')
+      this.getGoodsList()
+      this.$message.success('删除成功')
     }
+    // 
   },
   created() {
-      this.getGoodsList()
+    this.getGoodsList()
   }
 }
 </script>
