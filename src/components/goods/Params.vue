@@ -60,12 +60,25 @@
         <el-tab-pane label="静态属性" name="many">
           <el-button plain :disabled="isDisabledButton" @click="showAddParams">添加静态属性</el-button>
           <el-table :data="staticParams" border>
-            <!-- 下拉 -->
+            <!-- 下拉start -->
             <el-table-column type="expand">
               <template slot-scope="scope">
-                {{scope.row}}
+                <el-tag :key="i" v-for="(item, i) in scope.row.attr_vals" @close="deleteTags(i, scope.row)" closable>{{item}}</el-tag>
+                <el-input 
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                  clearable
+                >
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
               </template>
             </el-table-column>
+            <!-- 下拉end -->
             <el-table-column type="index" label="#" width="120"></el-table-column>
             <el-table-column prop="attr_id" label="参数id" width="120"></el-table-column>
             <el-table-column prop="cat_id" label="所属分类" width="120"></el-table-column>
@@ -193,11 +206,11 @@ export default {
       if (res.meta.status === 200) {
         // 动态tags添加自定义属性
         res.data.forEach(item => {
-          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : '' // 分割为数组
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : [] // 分割为数组
           item.inputVisible = false // 定义input显示
           item.inputValue = ''      // 定义input值
         })
-        // 表格数据
+        // 分配表格数据
         if (this.attributeType === 'only') {
           this.activeParams = res.data
         } else {
@@ -219,7 +232,6 @@ export default {
       if (this.shopsId === '') return
       // this.getAttributesList()
       if (this.isRequest) {           // 切换时发起了a类请求，再点发起b类的（只允许在请求一次），分类id改变时重置
-        this.attributeType = tab.name
         this.getAttributesList()
         this.isRequest = false
       }
