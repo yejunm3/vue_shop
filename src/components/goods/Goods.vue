@@ -98,24 +98,11 @@ export default {
       this.$router.push({ name: 'addgoods' })
     },
     editShops(scope) {
-      console.log(scope)
+      this.$router.push({ name: 'editgoods', query: { id: scope.goods_id } })
     },
-    // 删除商品
+    // 删除商品（这里的$confirm返回promise对象）
     async deleteShops(scope) {
-      // this.$confirm('是否删除此商品', '警告', {
-      //   confirmButtonText: '确定',
-      //   cancelButtonText: '取消',
-      //   type: 'warning'
-      // }).then(async () => {
-      //   const { data: res } = await this.$axios.delete('goods/' + scope.goods_id)
-      //   console.log(res)
-      //   if (res.meta.status !== 200) this.$message.error('删除失败')
-      //   this.getGoodsList()
-      //   this.$message.success('删除成功')
-      // }).catch(() => {
-      //   this.$message.info('取消操作')      
-      // })
-      const data = await this.$confirm('是否删除此商品', '警告', { // 返回一个promise
+      const data = await this.$confirm('是否删除此商品', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

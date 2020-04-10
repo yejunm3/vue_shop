@@ -10,12 +10,12 @@
     <el-card class="box-card">
       <!-- 头部 -->
       <el-steps :active="active" finish-status="success">
-        <el-step title="步骤 1"></el-step>
-        <el-step title="步骤 2"></el-step>
-        <el-step title="步骤 3"></el-step>
-        <el-step title="步骤 3"></el-step>
-        <el-step title="步骤 3"></el-step>
-        <el-step title="步骤 3"></el-step>
+        <el-step title="1"></el-step>
+        <el-step title="2"></el-step>
+        <el-step title="3"></el-step>
+        <el-step title="4"></el-step>
+        <el-step title="5"></el-step>
+        <el-step title="6"></el-step>
       </el-steps>
       <!-- 主体 -->
     </el-card>
