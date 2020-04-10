@@ -27,7 +27,7 @@
             <!-- 下拉start -->
             <el-table-column type="expand">
               <template slot-scope="scope">
-                <el-tag :key="item" v-for="item in scope.row.attr_vals" closable>{{item}}</el-tag>
+                <el-tag :key="i" v-for="(item, i) in scope.row.attr_vals" @close="deleteTags(i, scope.row)" closable>{{item}}</el-tag>
                 <el-input 
                   class="input-new-tag"
                   v-if="scope.row.inputVisible"
@@ -84,7 +84,7 @@
     </el-card>
     
     <!-- 添加弹窗 -->
-    <el-dialog title="添加参数" :visible.sync="addParamsDialog" @closed="resetAddParams" center>
+    <el-dialog :title="'添加' + isInputName" :visible.sync="addParamsDialog" @closed="resetAddParams" center>
       <el-form :model="addParams" :rules="addParamsRules" label-width="80px" ref="addParamsForm">
         <el-form-item label="参数类型">
           <el-input v-model="addParams.attr_sel" disabled></el-input>
@@ -92,7 +92,7 @@
         <el-form-item :label="isInputName" prop="attr_name">
           <el-input v-model="addParams.attr_name"></el-input>
         </el-form-item>
-        <el-form-item label="参数选项">
+        <el-form-item label="参数选项" prop="attr_vals">
           <el-input v-model="addParams.attr_vals"></el-input>
         </el-form-item>
         <el-form-item>
@@ -103,7 +103,7 @@
     </el-dialog>
 
     <!-- 编辑弹窗 -->
-    <el-dialog title="修改参数" :visible.sync="editParamsDialog" @closed="resetEditParams" center>
+    <el-dialog :title="'修改' + isInputName" :visible.sync="editParamsDialog" @closed="resetEditParams" center>
       <el-form :model="editParams" :rules="editParamsRules" label-width="80px" ref="editParamsForm">
         <el-form-item label="分类id">
           <el-input v-model="shopsId" disabled></el-input>
@@ -156,7 +156,10 @@ export default {
       },
       addParamsRules: {
         attr_name: [
-          { required: true, message: '请输入分类参数', trigger: 'blur' }
+          { required: true, message: '请输入参数名称', trigger: 'blur' }
+        ],
+        attr_vals: [
+          { required: false, trigger: 'blur' }
         ]
       },
       // 编辑参数
@@ -285,18 +288,45 @@ export default {
         this.$message.info('取消操作')      
       })
     },
-    // 按钮点击，tags输入框展现，并且默认选中
+    // 输入框展现，并且默认focus
     showInput(scope) {
       scope.inputVisible = true
       this.$nextTick( () => { // $nextTick 方法，就是当页面上元素被重新渲染之后，才会指定回调函数中的代码
         this.$refs.saveTagInput.focus()
       })
     },
-    // tags输入框 enter或者失焦时触发，若输入值为空则return
+    // tags添加事件（内容为空时return）
     handleInputConfirm(scope) {
+      if (scope.inputValue.trim() === '' ) return scope.inputVisible = false
+      scope.attr_vals.push(scope.inputValue.trim())
       scope.inputVisible = false
-      if (scope.inputValue.trim() === '' ) return
-      console.log(scope.inputValue)
+      scope.inputValue = ''
+      this.handleResponse(scope)
+      // 发起请求
+      // const params = new URLSearchParams
+      // params.append('attr_name', scope.attr_name)
+      // params.append('attr_sel', scope.attr_sel)
+      // params.append('attr_vals', scope.attr_vals.join(' '))
+      // const { data: res } = await this.$axios.put(`categories/${this.shopsId}/attributes/${scope.attr_id}`, params)
+      // console.log(res)
+      // if (res.meta.status !== 200) return this.$notify.error({ title: '警告', message: '操作失败' })
+      // this.$notify.success({ title: '提示', message: '操作成功' })
+    },
+    // tags删除事件
+    deleteTags(i, scope) {
+      scope.attr_vals.splice(i, 1)
+      this.handleResponse(scope)
+    },
+    // 抽离请求部分
+    async handleResponse(scope) {
+      const params = new URLSearchParams
+      params.append('attr_name', scope.attr_name)
+      params.append('attr_sel', scope.attr_sel)
+      params.append('attr_vals', scope.attr_vals.join(' '))
+      const { data: res } = await this.$axios.put(`categories/${this.shopsId}/attributes/${scope.attr_id}`, params)
+      console.log(res)
+      if (res.meta.status !== 200) return this.$notify.error({ title: '警告', message: '操作失败' })
+      this.$notify.success({ title: '提示', message: '操作成功' })
     }
     // 
   },
@@ -341,6 +371,7 @@ export default {
 }
 .el-tag {
   margin-right: 10px;
+  margin-bottom: 10px;
 }
 .input-new-tag {
   display: inline-block;

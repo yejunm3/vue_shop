@@ -44,7 +44,8 @@ import {
   Cascader,
   Link,
   Tabs,
-  TabPane
+  TabPane,
+  Notification
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -93,3 +94,4 @@ Vue.prototype.$msgbox = MessageBox
 Vue.prototype.$alert = MessageBox.alert
 Vue.prototype.$confirm = MessageBox.confirm
 Vue.prototype.$prompt = MessageBox.prompt
+Vue.prototype.$notify = Notification
