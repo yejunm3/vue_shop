@@ -47,7 +47,9 @@ import {
   TabPane,
   Notification,
   Steps,
-  Step
+  Step,
+  Drawer,
+  Alert
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -92,6 +94,8 @@ Vue.use(Tabs)
 Vue.use(TabPane)
 Vue.use(Steps)
 Vue.use(Step)
+Vue.use(Drawer)
+Vue.use(Alert)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
