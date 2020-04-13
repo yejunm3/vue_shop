@@ -25,7 +25,12 @@
           <el-input v-model="editGoods.goods_weight"></el-input>
         </el-form-item>
         <el-form-item label="商品介绍">
-          <el-button @click="details = true">查看详情</el-button>
+          <el-button @click="detailsFlag = true">查看详情</el-button>
+        </el-form-item>
+        <!-- 图片 -->
+        <el-form-item label="商品图片" class="image-list">
+          <el-image v-for="(item, i) in imageList" :key="i" :src="item" @click="showImageList(i)"></el-image>
+          <el-image-viewer :url-list="newImageList" v-if="imageListFlag" :on-close="closeImageList"></el-image-viewer>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitEditGoods">立即修改</el-button>
@@ -34,7 +39,7 @@
       </el-form>
     </el-card>
     <!-- 弹窗 -->
-    <el-drawer :with-header="false" :visible.sync="details">
+    <el-drawer :with-header="false" :visible.sync="detailsFlag">
       <el-alert title="详情介绍" type="info" show-icon center></el-alert>
       <div v-html="editGoods.goods_introduce"></div>
     </el-drawer>
@@ -42,11 +47,19 @@
 </template>
 
 <script>
+// 导入组件
+import ElImageViewer from 'element-ui/packages/image/src/image-viewer'
 export default {
   data() {
     return {
+      /**
+       * 商品id
+       * 右侧详情展开
+       * 编辑表单内容
+       * 编辑表单校验
+       */
       id: '',
-      details: false,
+      detailsFlag: false,
       editGoods: {
         goods_name: '',
         goods_price: '',
@@ -69,14 +82,29 @@ export default {
         goods_weight: [
           { required: true, message: '请输入商品重量', trigger: 'blur' }
         ]
-      }
+      },
+      /**
+       * 大图列表展开
+       * 小图列表
+       * 大图列表
+       */
+      imageListFlag: false,
+      imageList: [],
+      imageViewList: [], // 发起请求时存储
+      newImageList: []   // 每次点击时再渲染
     }
   },
   methods: {
+    /**
+     * 获取商品信息
+     * 取消 路由跳转
+     * 提交商品信息
+     */
     async getGoodsInfo() {
       const { data: res } = await this.$axios.get('goods/' + this.id)
       console.log(res)
       if (res.meta.status !== 200) return this.$message.error('获取商品参数失败')
+      // 获取商品参数
       this.editGoods.goods_name = res.data.goods_name
       this.editGoods.goods_price = res.data.goods_price
       this.editGoods.goods_number = res.data.goods_number
@@ -84,6 +112,11 @@ export default {
       this.editGoods.goods_introduce = res.data.goods_introduce
       this.editGoods.pics = res.data.pics
       this.editGoods.attrs = res.data.attrs
+      // 获取缩略图列表
+      res.data.pics.forEach((item, i) => {
+        this.imageList[i] = item.pics_sma_url
+        this.imageViewList[i] = item.pics_big_url
+      })
     },
     cancleEditGoods() {
       this.$router.push({ path: 'goods' })
@@ -96,7 +129,26 @@ export default {
         if (res !== 200) return this.$message.error('编辑商品失败')
         this.$message.error('编辑商品失败')
       })
+    },
+    /**
+     * 展现商品view
+     * 关闭商品view
+     */
+    showImageList(i) {
+      // 使用i作为数组分割，.slice(0,2) => arr[0],arr[1] .slice(2,5) => arr[2],arr[3],arr[4]，再合并为一个数组
+      this.newImageList = [
+        ...this.imageViewList.slice(i, this.imageViewList.length),
+        ...this.imageViewList.slice(0, i)
+      ]
+      this.imageListFlag = true
+    },
+    closeImageList() {
+      this.imageListFlag = false
     }
+    // 
+  },
+  components: {
+    ElImageViewer
   },
   created() {
     this.id = this.$route.query.id
@@ -121,6 +173,17 @@ export default {
     img {
       max-width: 100%;
       vertical-align: top;
+    }
+  }
+  .image-list {
+    .el-form-item__content {
+      display: flex;
+      .el-image {
+        padding-right: 10px;
+        img {
+          vertical-align: top;
+        }
+      }
     }
   }
 }

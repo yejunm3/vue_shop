@@ -49,7 +49,8 @@ import {
   Steps,
   Step,
   Drawer,
-  Alert
+  Alert,
+  Image
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -96,6 +97,7 @@ Vue.use(Steps)
 Vue.use(Step)
 Vue.use(Drawer)
 Vue.use(Alert)
+Vue.use(Image)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
