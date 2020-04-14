@@ -50,7 +50,11 @@ import {
   Step,
   Drawer,
   Alert,
-  Image
+  Image,
+  Checkbox,
+  CheckboxButton,
+  CheckboxGroup,
+  Upload
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -98,6 +102,10 @@ Vue.use(Step)
 Vue.use(Drawer)
 Vue.use(Alert)
 Vue.use(Image)
+Vue.use(Checkbox)
+Vue.use(CheckboxButton)
+Vue.use(CheckboxGroup)
+Vue.use(Upload)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
