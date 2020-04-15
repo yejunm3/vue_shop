@@ -16,6 +16,13 @@ import './assets/css/global.css'
 import ZkTable from 'vue-table-with-tree-grid'
 Vue.component('ZkTable', ZkTable)
 
+// 富文本编辑器
+import { quillEditor } from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+Vue.component('quillEditor', quillEditor)
+
 // this.$axios
 import axios from 'axios'
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
