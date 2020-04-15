@@ -68,7 +68,7 @@
           <quill-editor v-model="addGoods.goods_introduce"></quill-editor>
           <el-row>
             <el-button type="primary" @click="handleAddGoods">添加商品</el-button>
-            <el-button @click="handleCancelAdd">取消添加</el-button>
+            <el-button @click="handleCancelAdd">返回列表</el-button>
           </el-row>
         </el-tab-pane>
       </el-tabs>
@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   data() {
     return {
@@ -199,21 +200,22 @@ export default {
     handleSuccess(response) {
       this.addGoods.pics.push({ 'pic' :  response.data.tmp_path})
     },
-    // 提交添加商品
+    // 提交添加商品（复制一份数据进行操作）
     async handleAddGoods() {
-      this.addGoods.goods_cat = typeof(this.addGoods.goods_cat) === 'string' ? this.addGoods.goods_cat : this.addGoods.goods_cat.join(',')
-      this.addGoods.attrs = [] // 先清空
+      let newAddGoods = _.cloneDeep(this.addGoods)
+      newAddGoods.goods_cat = newAddGoods.goods_cat.join(',')
+      // 
       this.activeCateList.forEach(item => {
         if (item.attr_vals_check.length !== 0) {
-          this.addGoods.attrs.push({ 'attr_id': item.attr_id, 'attr_value': item.attr_vals_check.join(',') })
+          newAddGoods.attrs.push({ 'attr_id': item.attr_id, 'attr_value': item.attr_vals_check.join(',') })
         }
       })
       this.staticCateList.forEach(item => {
         if (item.attr_vals_check.length !== 0) {
-          this.addGoods.attrs.push({ 'attr_id': item.attr_id, 'attr_value': item.attr_vals_check.join(',') })
+          newAddGoods.attrs.push({ 'attr_id': item.attr_id, 'attr_value': item.attr_vals_check.join(',') })
         }
       })
-      const { data: res } = await this.$axios.post('goods', this.addGoods)
+      const { data: res } = await this.$axios.post('goods', newAddGoods)
       console.log(res)
       if (res.meta.status !== 201) return this.$message.error('添加失败')
       return this.$message.success('添加成功')
@@ -257,7 +259,7 @@ export default {
   .quill-editor {
     margin-bottom: 15px;
     .ql-editor {
-      min-height: 300px;
+      min-height: 250px;
     }
   }
 }
