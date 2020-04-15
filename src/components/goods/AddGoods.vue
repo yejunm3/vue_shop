@@ -68,7 +68,7 @@
           <quill-editor v-model="addGoods.goods_introduce"></quill-editor>
           <el-row>
             <el-button type="primary" @click="handleAddGoods">添加商品</el-button>
-            <el-button>取消添加</el-button>
+            <el-button @click="handleCancelAdd">取消添加</el-button>
           </el-row>
         </el-tab-pane>
       </el-tabs>
@@ -153,15 +153,17 @@ export default {
       if (res.meta.status !== 200) return this.$message.error('获取商品分类失败')
       this.shopsList = res.data
     },
+    // 表单预校验
     getFormCheck() {
       let formdata = ''
       this.$refs.addGoodsForm.validate(res => { formdata = res })
       return formdata
     },
+    // tabs跳转回调
     beforeLeave(newVal, oldVal) {
       if (oldVal === '0' && !this.getFormCheck()) return false
     },
-    // 获取checkbox
+    // 获取checkbox多选值
     async handleChange() {
       // 动态参数
       const { data: res } = await this.$axios.get(`categories/${this.addGoods.goods_cat[2]}/attributes`, { params: { sel : 'many' } })
@@ -193,7 +195,7 @@ export default {
         }
       })
     },
-    // 文件上传成功回调
+    // 上传成功
     handleSuccess(response) {
       this.addGoods.pics.push({ 'pic' :  response.data.tmp_path})
     },
@@ -213,6 +215,12 @@ export default {
       })
       const { data: res } = await this.$axios.post('goods', this.addGoods)
       console.log(res)
+      if (res.meta.status !== 201) return this.$message.error('添加失败')
+      return this.$message.success('添加成功')
+    },
+    // 取消添加商品
+    handleCancelAdd() {
+      this.$router.push({ path: 'goods' })
     }
     // 
   },
@@ -233,10 +241,13 @@ export default {
       font-size: 15px;
       padding-left: 25px;
     }
-    .el-checkbox {
-      margin-bottom: 15px;
-      .el-checkbox__label {
-        font-size: 15px;
+    .el-col-19 {
+      padding-left: 20px;
+      .el-checkbox {
+        margin-bottom: 15px;
+        .el-checkbox__label {
+          font-size: 15px;
+        }
       }
     }
   }
