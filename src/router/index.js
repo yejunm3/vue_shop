@@ -1,15 +1,16 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import login from '../components/Login.vue'
-import home from '../components/Home.vue'
-import users from '../components/user/Users.vue'
-import roles from '../components/power/Roles.vue'
-import rights from '../components/power/Rights.vue'
+import login from '../components/Login'
+import home from '../components/Home'
+import users from '../components/user/Users'
+import roles from '../components/power/Roles'
+import rights from '../components/power/Rights'
 import categories from '../components/goods/Categories'
 import params from '../components/goods/Params'
 import goods from '../components/goods/Goods'
 import addgoods from '../components/goods/AddGoods'
 import editgoods from '../components/goods/EditGoods'
+import orders from '../components/order/Orders'
 
 Vue.use(VueRouter)
 
@@ -29,7 +30,8 @@ const routes = [
       { path: 'params', component: params },
       { path: 'goods', component: goods },
       { path: 'addgoods', component: addgoods, name: 'addgoods' },
-      { path: 'editgoods', component: editgoods, name: 'editgoods' }
+      { path: 'editgoods', component: editgoods, name: 'editgoods' },
+      { path: 'orders', component: orders }
     ]
   }
 ]
