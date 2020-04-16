@@ -175,6 +175,10 @@ export default {
       vertical-align: top;
     }
   }
+  .el-image__error {
+    width: 150px;
+    height: 150px;
+  }
   .image-list {
     .el-form-item__content {
       display: flex;
