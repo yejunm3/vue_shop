@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="orders">
     <!-- 面包屑 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
@@ -18,12 +18,25 @@
         <el-table-column type="index" label="#" fixed></el-table-column>
         <el-table-column prop="order_id" label="订单id" width="80"></el-table-column>
         <el-table-column prop="order_number" label="订单编号" width="300"></el-table-column>
-        <el-table-column prop="order_price" label="订单总价"></el-table-column>
-        <el-table-column prop="is_send" label="是否发货"></el-table-column>
-        <el-table-column prop="pay_status" label="订单状态">
+        <el-table-column prop="order_price" label="订单价格"></el-table-column>
+        <el-table-column prop="is_send" label="是否发货">
           <template slot-scope="scope">
-            <el-tag type="danger" v-if="scope.row.pay_status === '0'">未付款</el-tag>
-            <el-tag type="success" v-else-if="scope.row.pay_status === '1'">已付款</el-tag>
+            <el-tag type="danger" v-if="scope.row.is_send === '否'">未发货</el-tag>
+            <el-tag type="success" v-else-if="scope.row.is_send === '是'">已发货</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="支付状态">
+          <template slot-scope="scope">
+            <el-tag type="danger" v-if="scope.row.pay_status === '0'">未支付</el-tag>
+            <el-tag type="success" v-else-if="scope.row.pay_status === '1'">已支付</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="支付方式">
+          <template slot-scope="scope">
+            <el-tag type="danger" v-if="scope.row.order_pay === '0'">未支付</el-tag>
+            <el-tag type="primary" v-else-if="scope.row.order_pay === '1'">支付宝</el-tag>
+            <el-tag type="primary" v-else-if="scope.row.order_pay === '2'">微信</el-tag>
+            <el-tag type="primary" v-else-if="scope.row.order_pay === '3'">银行卡</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="创建时间" width="180">
@@ -36,9 +49,12 @@
             {{ scope.row.update_time | dateFilter('YYYY/MM/DD hh:mm:ss') }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
-          <el-button type="primary" size="mini" icon="el-icon-edit" @click="editShops(scope.row)"></el-button>
-          <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteShops(scope.row)"></el-button>
+        <el-table-column label="操作" width="260" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="primary" size="small" icon="el-icon-truck" @click="showDeliveryDetails">物流</el-button>
+            <el-button type="primary" size="small" icon="el-icon-view" @click="showOrdersDetails(scope.row.order_id)">详情</el-button>
+            <el-button type="primary" size="small" icon="el-icon-edit" @click="showOrdersDetails(scope.row.order_id)">地址</el-button>
+          </template>
         </el-table-column>
       </el-table>
       <!-- 分页 -->
@@ -52,10 +68,64 @@
         :total="total"
       ></el-pagination>
     </el-card>
+
+    <!-- 物流详情 -->
+    <el-drawer :with-header="false" :visible.sync="deliveryDetails">
+      <el-alert title="物流详情" type="info" show-icon center></el-alert>
+      <el-timeline>
+        <el-timeline-item v-for="(item, i) in deliveryDetailsList" :key="i" :timestamp="item.ftime">
+          {{ item.context }}
+        </el-timeline-item>
+      </el-timeline>
+    </el-drawer>
+    
+    <!-- 订单详情 -->
+    <el-drawer :with-header="false" :visible.sync="ordersDetails" @close="handleClose">
+      <el-alert title="订单详情" type="info" show-icon center></el-alert>
+      <div class="orders-details">
+        <el-row>
+          <el-col :span="6">订单id</el-col>
+          <el-col :span="18"><el-input v-model="editOrdersId" :disabled="true"></el-input></el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">是否发货</el-col>
+          <el-col :span="18">
+            <el-switch v-model="editOrdersDetails.is_send" active-text="已发货" inactive-text="未发货"></el-switch>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">支付状态</el-col>
+          <el-col :span="18">
+            <el-switch v-model="editOrdersDetails.pay_status" active-text="已付款" inactive-text="已付款"></el-switch>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">支付方式</el-col>
+          <el-col :span="18">
+            <el-radio-group v-model="editOrdersDetails.order_pay" size="small">
+              <el-radio-button :label="'0'">未支付</el-radio-button>
+              <el-radio-button :label="'1'">支付宝</el-radio-button>
+              <el-radio-button :label="'2'">微信</el-radio-button>
+              <el-radio-button :label="'3'">银行卡</el-radio-button>
+            </el-radio-group>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">订单价格</el-col>
+          <el-col :span="18"><el-input v-model="editOrdersDetails.order_price" :disabled="true"></el-input></el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="6">订单数量</el-col>
+          <el-col :span="18"><el-input v-model="editOrdersDetails.order_number" :disabled="true"></el-input></el-col>
+        </el-row>
+      </div>
+    </el-drawer>
+
   </div>
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   data() {
     return {
@@ -65,7 +135,22 @@ export default {
         pagesize: 10 
       },
       total: null,
-      ordersList: []
+      ordersList: [],
+      // 物流详情
+      deliveryDetails: false,
+      deliveryDetailsList: [],
+      // 订单详情
+      ordersDetails: false,
+      ordersDetailsList: [],
+      // 修改订单
+      editOrdersId: '',
+      editOrdersDetails: {
+        is_send: '',
+        order_pay: '',
+        order_price: '',
+        order_number: '',
+        pay_status: ''
+      }
     }
   },
   methods: {
@@ -83,6 +168,46 @@ export default {
     handleSizeChange(newpagesize) {
       this.ordersQuery.pagesize = newpagesize
       this.getOrdersList()
+    },
+    // 物流详情展示
+    async showDeliveryDetails() {
+      const { data: res } = await this.$axios.get('/kuaidi/1106975712662')
+      console.log(res)
+      if (res.meta.status !== 200) return this.$message.error('获取物流详情失败')
+      this.deliveryDetailsList = res.data
+      this.deliveryDetails = true
+    },
+    // 订单详情展示
+    async showOrdersDetails(id) {
+      const { data: res } = await this.$axios.get('orders/' + id)
+      console.log(res)
+      if (res.meta.status !== 200) return this.$message.error('获取订单详情失败')
+      this.ordersDetails = true
+      // 
+      this.editOrdersId = res.data.order_id
+      this.editOrdersDetails.is_send = (res.data.is_send === '否' ? false : true)
+      this.editOrdersDetails.order_pay = res.data.order_pay
+      this.editOrdersDetails.order_price = res.data.order_price
+      this.editOrdersDetails.pay_status = (res.data.pay_status == 0 ? false : true)
+      this.editOrdersDetails.order_number = this.getOrderNumber(res.data.goods)
+    },
+    // 获取商品数量
+    getOrderNumber(goodsArr) {
+      let goodsNum = null
+      goodsArr.forEach(item => {
+        goodsNum += parseInt(item.goods_number)
+      })
+      return goodsNum
+    },
+    // 订单详情关闭
+    async handleClose() {
+      let ordersListClone = _.cloneDeep(this.editOrdersDetails)
+      // 
+      const { data:res } = await this.$axios.put('orders/' + this.editOrdersId, ordersListClone)
+      console.log(res)
+      if (res.meta.status !== 201) return this.$message.error('更新失败')
+      this.$message.success('更新成功')
+      this.getOrdersList()
     }
   },
   created() {
@@ -92,17 +217,53 @@ export default {
 </script>
 
 <style lang="less" scope>
-.el-breadcrumb {
-  margin-bottom: 10px;
-}
-.el-card__header {
-  padding: 15px 20px;
-  border-bottom: none;
-  .box-card-header {
-    display: flex;
-    .el-input {
-      width: 50%;
-      margin-right: 10px;
+.orders {
+  .el-breadcrumb {
+    margin-bottom: 10px;
+  }
+  .el-card__header {
+    padding: 15px 20px;
+    border-bottom: none;
+    .box-card-header {
+      display: flex;
+      .el-input {
+        width: 50%;
+        margin-right: 10px;
+      }
+    }
+  }
+  .el-card__body {
+    padding: 0 20px 20px;
+  }
+  .el-alert {
+    transform: translateY(-10px);
+  }
+  .el-drawer__body {
+    padding: 20px 10px 5px;
+    overflow-y: scroll;
+    word-wrap: break-word;
+    word-break: normal;
+    .el-timeline {
+      padding: 10px;
+      .el-timeline-item {
+        &:last-child {
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
+  .orders-details {
+    padding: 10px;
+    .el-row {
+      margin-bottom: 20px;
+      .el-col-6 {
+        line-height: 40px;
+        font-size: 15px;
+      }
+      .el-col-18 {
+        line-height: 40px;
+        font-size: 15px;
+      }
     }
   }
 }

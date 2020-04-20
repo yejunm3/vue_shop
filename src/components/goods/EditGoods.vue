@@ -166,7 +166,7 @@ export default {
     transform: translateY(-10px);
   }
   .el-drawer__body {
-    padding: 20px;
+    padding: 20px 10px;
     overflow-y: scroll;
     word-wrap: break-word;
     word-break: normal;

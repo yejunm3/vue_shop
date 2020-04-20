@@ -54,7 +54,9 @@ import {
   Checkbox,
   CheckboxButton,
   CheckboxGroup,
-  Upload
+  Upload,
+  Timeline,
+  TimelineItem
 } from 'element-ui'
 Vue.use(Row)
 Vue.use(Col)
@@ -106,6 +108,8 @@ Vue.use(Checkbox)
 Vue.use(CheckboxButton)
 Vue.use(CheckboxGroup)
 Vue.use(Upload)
+Vue.use(Timeline)
+Vue.use(TimelineItem)
 // 全局挂载 $message
 Vue.prototype.$message = Message
 Vue.prototype.$msgbox = MessageBox
