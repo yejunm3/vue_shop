@@ -23,18 +23,12 @@ import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 Vue.component('quillEditor', quillEditor)
 
+// echarts
+import echarts from 'echarts'
+Vue.prototype.$echarts = echarts
+
 // this.$axios
-import axios from 'axios'
-axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
-axios.interceptors.request.use(
-  config => {
-    config.headers.Authorization = window.sessionStorage.getItem('token')
-    return config
-  },
-  error => {
-    return console.log(error)
-  }
-)
+import axios from './modules/vue_axios.js'
 Vue.prototype.$axios = axios
 
 // 全局过滤器
