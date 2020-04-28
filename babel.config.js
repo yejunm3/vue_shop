@@ -6,5 +6,5 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = {
   presets: ['@vue/cli-plugin-babel/preset'],
-  plugins: [...is_remove]
+  plugins: [...is_remove, '@babel/plugin-syntax-dynamic-import']
 }
